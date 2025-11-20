@@ -1,0 +1,738 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hungry Lens</title>
+    <!-- Load Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use a pleasing font like Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles to match the warm color scheme and font */
+        :root {
+            --header-start: #e04b2e; /* A warm reddish-orange */
+            --header-end: #ffa500;   /* A bright orange */
+            --button-color: #d97706; /* Deep orange/brown */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fff7ed; /* Very light orange/cream background */
+        }
+        .header-bg {
+            /* Custom gradient matching the screenshot */
+            background: linear-gradient(90deg, var(--header-start) 0%, var(--header-end) 100%);
+        }
+        .main-card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-custom {
+            background-color: var(--button-color);
+            transition: background-color 0.2s;
+        }
+        .btn-custom:hover {
+            background-color: #b45309; /* Darker orange on hover */
+        }
+        /* Custom responsive padding for video embeds (16:9 aspect ratio) */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        /* Thumbnail Hover Effect */
+        .video-thumbnail-wrapper {
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        .video-thumbnail-wrapper:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 0.75rem; /* Match rounded-xl */
+        }
+        .video-thumbnail-wrapper:hover .play-overlay {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navigation Bar -->
+    <header class="header-bg p-4 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center">
+            <!-- Icon/Logo Placeholder (Matching the small square icon in the image) -->
+            <div class="bg-white/30 p-2 rounded-lg mr-3 shadow-inner">
+                <span class="text-xl text-white select-none" aria-hidden="true">🍜</span>
+            </div>
+            <!-- Title -->
+            <h1 id="homeLink" class="text-2xl font-bold text-white tracking-wide cursor-pointer hover:opacity-90 transition duration-150">The Hungry Lens</h1>
+        </div>
+    </header>
+
+    <!-- Main Application Container (Holds all views) -->
+    <div id="app-container" class="flex flex-col items-center p-4 md:p-8">
+
+        <!-- 1. WELCOME VIEW (Initial View) -->
+        <div id="welcome-view" class="w-full max-w-4xl">
+            <!-- Featured Icons Section -->
+            <div class="flex justify-center space-x-6 my-10">
+                <!-- Food Icon -->
+                <span class="text-5xl" aria-label="Steaming Bowl Icon" role="img">☕</span>
+                <!-- Video Camera Icon -->
+                <span class="text-5xl" aria-label="Video Camera Icon" role="img">🎥</span>
+            </div>
+
+            <!-- Main Welcome Card -->
+            <div class="main-card bg-white p-8 md:p-12 rounded-2xl text-center">
+                
+                <!-- Card Title -->
+                <h2 class="text-3xl font-extrabold text-gray-800 mb-6">
+                    Welcome to <span class="text-orange-700">The Hungry Lens</span>
+                </h2>
+
+                <!-- Card Body Text -->
+                <p class="text-gray-600 leading-relaxed text-base md:text-lg">
+                    Welcome to <strong class="text-orange-700">The Hungry Lens</strong> — a feast for your eyes and your appetite! 🥘 This isn't just a website, it's a full-on flavor experience where food lovers unite to drool, laugh, and share their culinary passions. Watch creators dive into epic mukbangs that'll make you crave a bite (or five), then explore our treasure trove of Indian recipes for every meal of the day. So, whether you're here to watch, cook, or simply daydream about food, <strong class="text-orange-700">The Hungry Lens</strong> serves up satisfaction all the time!
+                </p>
+            </div>
+            
+            <!-- Button Group -->
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 mt-12">
+                <button id="recipesBtn" class="btn-custom text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out">
+                    Recipes
+                </button>
+                <button id="videosBtn" class="btn-custom text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out">
+                    Videos
+                </button>
+                <button id="uploadBtn" class="btn-custom text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out">
+                    Upload
+                </button>
+            </div>
+            <!-- Simple message box for button actions -->
+            <div id="messageBox" class="mt-8 text-center text-xl font-medium text-green-700 h-8"></div>
+        </div>
+
+        <!-- 2. VIDEOS VIEW (Initially hidden) -->
+        <div id="videos-view" class="w-full max-w-7xl hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-4xl font-extrabold text-gray-800">Epic Mukbangs</h2>
+                <!-- Button for video upload on the video page -->
+                <button id="uploadVideoBtn" class="btn-custom text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-150 ease-in-out">
+                    Upload Your Video
+                </button>
+            </div>
+
+            <!-- Video Grid -->
+            <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Videos will be populated here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- 3. RECIPES VIEW (New, Initially hidden) -->
+        <div id="recipes-view" class="w-full max-w-7xl hidden">
+            <h2 class="text-5xl font-extrabold text-center text-orange-700 mb-12 py-4 border-b-4 border-orange-200 shadow-md rounded-lg bg-white/70">
+                Authentic Maharashtrian Delights
+            </h2>
+
+            <!-- BREAKFAST SECTION (Collapsible) -->
+            <section class="mb-8">
+                <div id="header-breakfast" class="section-header cursor-pointer flex justify-between items-center border-l-8 border-orange-500 pl-4 py-3 mb-4 bg-orange-100/70 rounded-r-lg shadow-md transition duration-150 ease-in-out hover:bg-orange-200/70" data-target="breakfast-recipes">
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-800">
+                        Breakfast — Amp Up Your Morning
+                    </h3>
+                    <svg id="chevron-breakfast-recipes" class="w-7 h-7 text-orange-700 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <!-- Content starts hidden -->
+                <div id="breakfast-recipes" class="recipe-content hidden mt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Recipes will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- LUNCH SECTION (Collapsible) -->
+            <section class="mb-8">
+                <div id="header-lunch" class="section-header cursor-pointer flex justify-between items-center border-l-8 border-orange-500 pl-4 py-3 mb-4 bg-orange-100/70 rounded-r-lg shadow-md transition duration-150 ease-in-out hover:bg-orange-200/70" data-target="lunch-recipes">
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-800">
+                        Lunch — Hearty & Home-Style
+                    </h3>
+                    <svg id="chevron-lunch-recipes" class="w-7 h-7 text-orange-700 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <!-- Content starts hidden -->
+                <div id="lunch-recipes" class="recipe-content hidden mt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Recipes will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- DINNER SECTION (Collapsible) -->
+            <section class="mb-8">
+                <div id="header-dinner" class="section-header cursor-pointer flex justify-between items-center border-l-8 border-orange-500 pl-4 py-3 mb-4 bg-orange-100/70 rounded-r-lg shadow-md transition duration-150 ease-in-out hover:bg-orange-200/70" data-target="dinner-recipes">
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-800">
+                        Dinner — A Sweet & Savory Finish
+                    </h3>
+                    <svg id="chevron-dinner-recipes" class="w-7 h-7 text-orange-700 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <!-- Content starts hidden -->
+                <div id="dinner-recipes" class="recipe-content hidden mt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Recipes will be populated here -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+
+    <!-- 4. VIDEO PLAYER MODAL -->
+    <div id="video-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 transition duration-300">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl relative">
+            <button id="closeVideoModal" class="absolute -top-3 -right-3 bg-red-600 text-white w-8 h-8 rounded-full font-bold text-xl hover:bg-red-700 transition duration-150 z-50">
+                &times;
+            </button>
+            <div class="p-2">
+                <div id="video-embed" class="video-container rounded-lg overflow-hidden">
+                    <!-- Iframe will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. UPLOAD MODAL (Now a functional form) -->
+    <div id="upload-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 transition duration-300">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
+            <button id="closeUploadModal" class="absolute -top-3 -right-3 bg-red-600 text-white w-8 h-8 rounded-full font-bold text-xl hover:bg-red-700 transition duration-150 z-50">
+                &times;
+            </button>
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Upload Video Link</h3>
+            
+            <form id="videoUploadForm">
+                <div class="mb-4">
+                    <label for="videoTitleInput" class="block text-sm font-medium text-gray-700 mb-1">Video Title</label>
+                    <input type="text" id="videoTitleInput" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500" placeholder="Enter a descriptive title for your video">
+                </div>
+                <div class="mb-6">
+                    <label for="videoUrlInput" class="block text-sm font-medium text-gray-700 mb-1">YouTube Video Link (URL)</label>
+                    <input type="url" id="videoUrlInput" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500" placeholder="e.g., https://www.youtube.com/watch?v=XXXXXX">
+                </div>
+                <button type="submit" class="btn-custom w-full text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition duration-150 ease-in-out">
+                    Add Video
+                </button>
+            </form>
+
+            <p id="uploadMessage" class="mt-4 text-sm text-red-600 hidden text-center"></p>
+        </div>
+    </div>
+
+    <!-- JavaScript for interactivity -->
+    <script>
+        // --- DATA ---
+        let videoData = [
+            { id: 'KCryAou5Cas', title: 'Pizza Muckbang', duration: 'Short' },
+            { id: 'UV-u1ddSbNo', title: 'Spicy Noodles Muckbang', duration: 'Short' },
+            { id: 'kBcYlgpHbJA', title: '"What I Eat In Day" - KarissaEats', duration: 'Short' },
+            { id: '8s8a5B9GzGo', title: '"Spicy Burger Challenge - Matt Stonie"', duration: '7:45' },
+        ];
+
+        const recipeData = {
+            breakfast: [
+                { 
+                    title: "Kanda Poha", 
+                    description: "Fluffy flattened rice (poha) tempered with a host of spices and sautéed onions (kanda). A light, quick, and perfectly spiced breakfast staple.", 
+                    ingredients: [
+                        "2 cups Poha (flattened rice)", 
+                        "1 large Onion (chopped)", 
+                        "2 tbsp Oil", 
+                        "1 tsp Mustard Seeds", 
+                        "1 tsp Cumin Seeds", 
+                        "10-12 Curry Leaves", 
+                        "2-3 Green Chilies (slit)", 
+                        "1/2 tsp Turmeric Powder", 
+                        "Salt to taste", 
+                        "1 tsp Sugar", 
+                        "Lemon Juice (for serving)", 
+                        "fresh Coriander (for garnish)"
+                    ],
+                    method: [
+                        "Rinse the poha quickly and drain, letting it soften for 5 minutes.", 
+                        "Heat oil in a pan, add mustard seeds and cumin. Once they splutter, add curry leaves and green chilies.", 
+                        "Sauté the chopped onions until translucent.", 
+                        "Add turmeric, salt, and sugar. Mix well.", 
+                        "Gently fold in the softened poha.", 
+                        "Cover and steam for 2 minutes on low heat.", 
+                        "Garnish with fresh coriander and a squeeze of lemon juice before serving."
+                    ]
+                },
+                { 
+                    title: "Misal Pav", 
+                    description: "A fiery and flavourful curry made from sprouted lentils (matki), topped with crunchy farsan, raw chopped onions, and cilantro. Served with soft pav bread.", 
+                    ingredients: [
+                        "1 cup Matki Sprouts", 
+                        "1 large Onion (finely chopped, for gravy)", 
+                        "1 large Tomato (pureed)", 
+                        "2 tbsp Goda Masala", 
+                        "1 tsp Red Chili Powder", 
+                        "1/2 tsp Turmeric", 
+                        "Oil, Salt to taste, Water", 
+                        "Farsan (mixture, for topping)", 
+                        "chopped raw Onion (for topping)", 
+                        "Coriander (for garnish)", 
+                        "4 Pav breads"
+                    ],
+                    method: [
+                        "Boil matki sprouts with turmeric and salt until tender.", 
+                        "In a separate pan, heat oil, sauté onions until brown, then add tomato puree and dry spices, including Goda Masala.", 
+                        "Cook the masala until oil separates.", 
+                        "Add the boiled matki and enough water to make a thin curry (known as Rassa).", 
+                        "Simmer for 15 minutes.", 
+                        "Serve hot, topped with farsan, chopped raw onions, and coriander, with pav on the side."
+                    ]
+                },
+                { 
+                    title: "Thalipeeth", 
+                    description: "A nutritious, multi-grain flatbread made from a mix of flours (bhajani), spices, and finely chopped onions. Best served hot with curd or white butter.", 
+                    ingredients: [
+                        "1 cup Bhajani Flour (mixed grain flour)", 
+                        "1/4 cup finely chopped Onion", 
+                        "1 tbsp Ginger-Garlic paste", 
+                        "1 Green Chili (crushed)", 
+                        "1/2 tsp Cumin Powder", 
+                        "Salt to taste", 
+                        "Oil for roasting", 
+                        "Curd (Yogurt, for serving)"
+                    ],
+                    method: [
+                        "In a bowl, mix the bhajani flour with onion, ginger-garlic paste, chili, cumin powder, and salt.", 
+                        "Add water gradually to form a soft dough (not too stiff).", 
+                        "Divide the dough into small balls.", 
+                        "Take a piece of moist muslin cloth or parchment paper, pat a ball of dough flat into a circle (approx. 5-6 inches diameter).", 
+                        "Make a few holes in the center.", 
+                        "Roast on a hot tawa with oil/ghee until crisp and golden brown on both sides.", 
+                        "Serve hot with curd."
+                    ]
+                }
+            ],
+            lunch: [
+                { 
+                    title: "Vangyachi Bhaji (Stuffed Eggplant Curry)", 
+                    description: "A classic Maharashtrian vegetarian curry featuring small purple eggplants cooked in a spicy, coconut-peanut based gravy. Served best with Bhakri or chapati.", 
+                    ingredients: [
+                        "6-8 small Eggplants (Vangi)", 
+                        "1/2 cup roasted Peanuts (ground)", 
+                        "1/4 cup dry Coconut (grated and roasted)", 
+                        "1 tbsp Goda Masala", 
+                        "1 tsp Jaggery powder", 
+                        "1 tsp Tamarind pulp", 
+                        "Turmeric, Chili Powder, Oil, and Salt"
+                    ],
+                    method: [
+                        "Make a cross slit on the eggplants, leaving the stem intact.", 
+                        "Mix the ground peanuts, roasted coconut, Goda Masala, jaggery, tamarind, and other dry spices with a little oil to make a stuffing.", 
+                        "Stuff the eggplants.", 
+                        "Heat oil in a pan, add remaining stuffing masala and sauté.", 
+                        "Place the stuffed eggplants in the pan, add 1 cup of water, cover, and cook on low heat until the eggplants are tender and the gravy thickens (about 20-25 minutes).", 
+                        "Serve with chapati."
+                    ]
+                },
+                { 
+                    title: "Masale Bhaat", 
+                    description: "A fragrant, one-pot rice dish where rice is cooked with mixed vegetables, cashews, and the aromatic Goda masala, making it a perfect hearty lunch.", 
+                    ingredients: [
+                        "1 cup Basmati Rice", 
+                        "1/2 cup Mixed Vegetables (peas, carrots, potato)", 
+                        "2 tbsp Ghee", 
+                        "1/2 tsp Mustard Seeds", 
+                        "1 tsp Cumin Seeds", 
+                        "1 large Onion (sliced)", 
+                        "1 tbsp Goda Masala", 
+                        "1/4 cup Cashews", 
+                        "Salt, and 2 cups Water"
+                    ],
+                    method: [
+                        "Wash and soak rice for 20 minutes.", 
+                        "Heat ghee in a pressure cooker or heavy-bottomed pan. Add mustard seeds and cumin.", 
+                        "Once they crackle, add sliced onion and sauté until golden.", 
+                        "Add mixed vegetables, cashews, and Goda Masala. Sauté for 2 minutes.", 
+                        "Drain the rice and add it to the mixture.", 
+                        "Add 2 cups of water and salt.", 
+                        "Close the lid and cook for 2 whistles (if using a pressure cooker) or until all water is absorbed and rice is cooked."
+                    ]
+                },
+                { 
+                    title: "Solkadhi", 
+                    description: "A refreshing, digestive drink made from coconut milk and kokum (Garcinia indica). It has a lovely pink hue and a soothing, tangy, slightly sweet flavour.", 
+                    ingredients: [
+                        "1 cup fresh Coconut (grated)", 
+                        "5-6 pieces of dry Kokum (soaked in 1/2 cup warm water)", 
+                        "1 inch Ginger piece", 
+                        "2 Green Chilies", 
+                        "1/4 tsp Salt", 
+                        "1/2 tsp Sugar", 
+                        "2 cups Water"
+                    ],
+                    method: [
+                        "Blend the grated coconut, ginger, and green chilies with 1 cup of water to make a paste.", 
+                        "Strain this paste through a muslin cloth to extract thick coconut milk.", 
+                        "Repeat this process with the remaining water for thinner milk.", 
+                        "In a separate bowl, squeeze the soaked kokum to extract the dark pink essence.", 
+                        "Mix the kokum essence, coconut milk, salt, and sugar.", 
+                        "Chill thoroughly before serving. The kokum gives it its characteristic pink color."
+                    ]
+                }
+            ],
+            dinner: [
+                { 
+                    title: "Zunka Bhakri", 
+                    description: "Zunka is a dry, crumbly side dish made from chickpea flour (besan), often served with a Jowar or Bajra Bhakri (flatbread) for a rustic, satisfying dinner.", 
+                    ingredients: [
+                        "1 cup Besan (Chickpea Flour)", 
+                        "1 large Onion (finely chopped)", 
+                        "2 tbsp Oil", 
+                        "1 tsp Mustard Seeds", 
+                        "1 tsp Cumin Seeds", 
+                        "1/2 tsp Turmeric", 
+                        "2-3 cloves Garlic (crushed)", 
+                        "Green Chilies", 
+                        "Salt", 
+                        "Jowar Flour (for Bhakri)"
+                    ],
+                    method: [
+                        "Mix besan with water, turmeric, and salt to form a thin batter (like buttermilk consistency).", 
+                        "Heat oil in a pan, add mustard seeds, cumin, and let them splutter.", 
+                        "Add chopped onion, crushed garlic, and chilies. Sauté until onions soften.", 
+                        "Pour the besan batter into the tempering. Stir continuously until the mixture thickens and eventually turns into a dry, crumbly mass (Zunka).", 
+                        "Cover and steam for 5 minutes.", 
+                        "Serve hot with Bhakri."
+                    ]
+                },
+                { 
+                    title: "Puran Poli", 
+                    description: "A delicate, sweet flatbread stuffed with 'Puran'—a delicious filling of boiled chana dal (split chickpeas) and jaggery. It's often reserved for festivals and special dinners.", 
+                    ingredients: [
+                        "1 cup Chana Dal", 
+                        "1 cup Jaggery (grated)", 
+                        "1/2 tsp Cardamom Powder", 
+                        "2 cups Wheat Flour (for the outer dough)", 
+                        "2 tbsp Oil/Ghee", 
+                        "Salt to taste"
+                    ],
+                    method: [
+                        "Boil chana dal until very soft. Drain completely and mash it.", 
+                        "In a pan, mix the mashed dal and grated jaggery.", 
+                        "Cook on low heat, stirring constantly, until the mixture (Puran) thickens and leaves the sides of the pan. Add cardamom powder.", 
+                        "Prepare soft dough from wheat flour, oil, and salt.", 
+                        "Take a portion of the dough, flatten it, place a ball of Puran inside, and seal it.", 
+                        "Roll gently into a flatbread (Poli).", 
+                        "Cook on a hot tawa with ghee until light brown spots appear on both sides.", 
+                        "Serve warm."
+                    ]
+                },
+                { 
+                    title: "Batata Vada (Potato Fritters)", 
+                    description: "Spiced mashed potato balls coated in a chickpea flour batter and deep-fried until golden. A popular snack that makes for a great dinner side or light meal.", 
+                    ingredients: [
+                        "4 large Potatoes (boiled and mashed)", 
+                        "1 cup Besan (Chickpea Flour)", 
+                        "1 tsp Mustard Seeds", 
+                        "1 tsp Turmeric", 
+                        "1 tbsp Ginger-Garlic-Green Chili Paste", 
+                        "Curry Leaves", 
+                        "Salt", 
+                        "Oil for deep frying"
+                    ],
+                    method: [
+                        "For the filling: Heat 1 tbsp oil, add mustard seeds, curry leaves, and the paste. Sauté briefly.", 
+                        "Add mashed potatoes, turmeric, and salt. Mix well and let it cool.", 
+                        "Roll the mixture into small balls (vadas).", 
+                        "For the batter: Mix besan, salt, and water to form a smooth, thick pouring consistency.", 
+                        "Dip each potato ball into the batter, ensuring it's fully coated.", 
+                        "Deep fry the vadas in hot oil until golden brown and crispy.", 
+                        "Serve immediately with chutney."
+                    ]
+                }
+            ]
+        };
+
+
+        // --- ELEMENTS ---
+        const welcomeView = document.getElementById('welcome-view');
+        const videosView = document.getElementById('videos-view');
+        const recipesView = document.getElementById('recipes-view'); 
+        const videoGrid = document.getElementById('video-grid');
+        const videoModal = document.getElementById('video-modal');
+        const videoEmbed = document.getElementById('video-embed');
+        const uploadModal = document.getElementById('upload-modal');
+        const messageBox = document.getElementById('messageBox');
+        
+        // --- UTILITY FUNCTIONS ---
+        function getThumbnailUrl(videoId) {
+            return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`; 
+        }
+
+        function getEmbedUrl(videoId) {
+            return `https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0`;
+        }
+
+        function showMessage(text) {
+            messageBox.textContent = text;
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
+        }
+
+        function extractVideoId(url) {
+            const regex = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/))([\w-]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+
+        // --- VIEW MANAGEMENT ---
+        function navigateTo(viewId) {
+            welcomeView.classList.add('hidden');
+            videosView.classList.add('hidden');
+            recipesView.classList.add('hidden'); 
+
+            if (viewId === 'welcome') {
+                welcomeView.classList.remove('hidden');
+            } else if (viewId === 'videos') {
+                videosView.classList.remove('hidden');
+                renderVideoGrid();
+            } else if (viewId === 'recipes') { 
+                recipesView.classList.remove('hidden');
+                renderRecipes();
+            }
+        }
+
+        // --- VIDEO GRID RENDERING ---
+        function renderVideoGrid() {
+            videoGrid.innerHTML = ''; 
+            
+            videoData.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.className = 'bg-white rounded-xl shadow-lg overflow-hidden video-thumbnail-wrapper';
+                videoCard.setAttribute('data-video-id', video.id);
+                videoCard.innerHTML = `
+                    <div class="relative pb-[56.25%] h-0">
+                        <img src="${getThumbnailUrl(video.id)}" alt="${video.title} thumbnail" class="absolute inset-0 w-full h-full object-cover">
+                        <div class="play-overlay">
+                            <svg class="w-16 h-16 text-white opacity-90" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 3l12 9-12 9V3z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-semibold text-gray-800 truncate">${video.title}</h4>
+                        <p class="text-sm text-gray-500 mt-1">${video.duration}</p>
+                    </div>
+                `;
+                videoGrid.appendChild(videoCard);
+
+                videoCard.addEventListener('click', () => playVideo(video.id));
+            });
+        }
+
+        // Helper function to format an array of strings into an unordered HTML list
+        function formatList(items) {
+            if (!Array.isArray(items)) return '<p class="text-sm text-gray-800">Data not available.</p>';
+            return `<ul class="list-disc ml-5 space-y-1 mt-1 text-gray-800 text-sm">` + 
+                   items.map(item => `<li>${item}</li>`).join('') + 
+                   `</ul>`;
+        }
+
+        // --- RECIPE RENDERING ---
+        function createRecipeCard(recipe) {
+            // Card structure remains the same
+            return `
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-orange-100 hover:shadow-xl transition duration-300 flex flex-col">
+                    <h4 class="text-xl font-bold text-orange-700 mb-2">${recipe.title}</h4>
+                    <p class="text-sm text-gray-500 mb-4 italic flex-shrink-0">${recipe.description}</p>
+                    
+                    <div class="space-y-4 flex-grow">
+                        <!-- Ingredients Section -->
+                        <div class="p-3 bg-yellow-50/50 rounded-lg">
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-1 border-b border-yellow-200 pb-1">Ingredients</p>
+                            ${formatList(recipe.ingredients)}
+                        </div>
+
+                        <!-- Method Section -->
+                        <div class="p-3 bg-red-50/50 rounded-lg">
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-1 border-b border-red-200 pb-1">Method</p>
+                            ${formatList(recipe.method)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // This function now only inserts the content into the hidden containers
+        function renderRecipes() {
+            // Note: The content itself is wrapped in a grid container within the HTML structure
+            document.querySelector('#breakfast-recipes > div').innerHTML = recipeData.breakfast.map(createRecipeCard).join('');
+            document.querySelector('#lunch-recipes > div').innerHTML = recipeData.lunch.map(createRecipeCard).join('');
+            document.querySelector('#dinner-recipes > div').innerHTML = recipeData.dinner.map(createRecipeCard).join('');
+        }
+
+        // --- COLLAPSE/EXPAND LOGIC (NEW) ---
+        function toggleSection(headerElement) {
+            const targetId = headerElement.getAttribute('data-target');
+            const targetContent = document.getElementById(targetId);
+            const chevronIcon = document.getElementById(`chevron-${targetId}`);
+
+            if (targetContent && chevronIcon) {
+                // Toggle the 'hidden' class on the content container
+                targetContent.classList.toggle('hidden');
+
+                // Toggle the rotation of the chevron icon (to point up/down)
+                if (targetContent.classList.contains('hidden')) {
+                    chevronIcon.classList.remove('rotate-180');
+                } else {
+                    chevronIcon.classList.add('rotate-180');
+                }
+            }
+        }
+
+
+        // --- MODAL & VIDEO PLAYER FUNCTIONS ---
+        function playVideo(videoId) {
+            videoEmbed.innerHTML = `
+                <iframe 
+                    src="${getEmbedUrl(videoId)}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen
+                    title="${videoData.find(v => v.id === videoId)?.title || 'Embedded Video'}">
+                </iframe>
+            `;
+            videoModal.classList.remove('hidden');
+        }
+
+        function closeVideoModal() {
+            videoEmbed.innerHTML = '';
+            videoModal.classList.add('hidden');
+        }
+
+        function showUploadModal() {
+            document.getElementById('videoUploadForm').reset();
+            document.getElementById('uploadMessage').classList.add('hidden');
+            document.getElementById('uploadMessage').textContent = '';
+            uploadModal.classList.remove('hidden');
+        }
+
+        // --- UPLOAD HANDLER ---
+        function handleVideoUpload(event) {
+            event.preventDefault();
+
+            const titleInput = document.getElementById('videoTitleInput');
+            const urlInput = document.getElementById('videoUrlInput');
+            const uploadMessage = document.getElementById('uploadMessage');
+            
+            const title = titleInput.value.trim();
+            const url = urlInput.value.trim();
+            const videoId = extractVideoId(url);
+
+            uploadMessage.classList.add('hidden');
+            uploadMessage.textContent = '';
+            
+            if (!videoId) {
+                uploadMessage.textContent = 'Invalid YouTube URL. Please check the link format.';
+                uploadMessage.classList.remove('hidden');
+                return;
+            }
+
+            if (videoData.some(v => v.id === videoId)) {
+                uploadMessage.textContent = 'This video is already in the gallery.';
+                uploadMessage.classList.remove('hidden');
+                return;
+            }
+
+            let duration = 'New Upload';
+            if (url.includes('/shorts/')) {
+                duration = 'Short';
+            } else if (url.includes('watch?v=') || url.includes('/v/')) {
+                duration = 'Video';
+            }
+            
+            const newVideo = {
+                id: videoId,
+                title: title,
+                duration: duration
+            };
+
+            videoData.push(newVideo);
+            
+            document.getElementById('videoUploadForm').reset();
+            uploadModal.classList.add('hidden');
+            showMessage(`Video "${title}" added successfully!`);
+
+            navigateTo('videos');
+        }
+
+        // --- INITIALIZATION AND EVENT LISTENERS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Event Listeners for Navigation Buttons
+            document.getElementById('homeLink').addEventListener('click', () => navigateTo('welcome'));
+            
+            // Navigate to Recipes view when the main Recipes button is clicked
+            document.getElementById('recipesBtn').addEventListener('click', () => navigateTo('recipes'));
+
+            // Navigate to videos view when the main Videos button is clicked
+            document.getElementById('videosBtn').addEventListener('click', () => navigateTo('videos'));
+
+            // Show Upload modal from Welcome page
+            document.getElementById('uploadBtn').addEventListener('click', showUploadModal);
+            
+            // Show Upload modal from Videos page
+            document.getElementById('uploadVideoBtn').addEventListener('click', showUploadModal); 
+            
+            // Form Submit Listener for Upload Modal
+            document.getElementById('videoUploadForm').addEventListener('submit', handleVideoUpload);
+
+            // Close Video Modal
+            document.getElementById('closeVideoModal').addEventListener('click', closeVideoModal);
+            
+            // Close Upload Modal
+            document.getElementById('closeUploadModal').addEventListener('click', () => uploadModal.classList.add('hidden'));
+
+            // Optional: Close modals when clicking outside
+            videoModal.addEventListener('click', (e) => {
+                if (e.target === videoModal) closeVideoModal();
+            });
+            uploadModal.addEventListener('click', (e) => {
+                if (e.target === uploadModal) uploadModal.classList.add('hidden');
+            });
+            
+            // --- NEW: Attach listeners to all section headers for collapse/expand ---
+            document.querySelectorAll('.section-header').forEach(header => {
+                header.addEventListener('click', () => toggleSection(header));
+            });
+
+
+            // Start on the welcome view
+            navigateTo('welcome');
+        });
+    </script>
+
+</body>
+</html>
