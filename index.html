@@ -10,7 +10,7 @@
     <!-- Use a pleasing font like Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles to match the warm color scheme and font */
+        /* warm color scheme and font */
         :root {
             --header-start: #e04b2e; /* A warm reddish-orange */
             --header-end: #ffa500;   /* A bright orange */
@@ -33,7 +33,7 @@
         .btn-custom:hover {
             background-color: #b45309; /* Darker orange on hover */
         }
-        /* Custom responsive padding for video embeds (16:9 aspect ratio) */
+        /* responsive padding for video embeds (16:9 aspect ratio) */
         .video-container {
             position: relative;
             width: 100%;
@@ -80,7 +80,7 @@
     <!-- Header / Navigation Bar -->
     <header class="header-bg p-4 shadow-lg">
         <div class="max-w-7xl mx-auto flex items-center">
-            <!-- Icon/Logo Placeholder (Matching the small square icon in the image) -->
+            <!-- Icon/Logo Placeholder -->
             <div class="bg-white/30 p-2 rounded-lg mr-3 shadow-inner">
                 <span class="text-xl text-white select-none" aria-hidden="true">🍜</span>
             </div>
@@ -144,11 +144,10 @@
 
             <!-- Video Grid -->
             <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Videos will be populated here by JavaScript -->
             </div>
         </div>
 
-        <!-- 3. RECIPES VIEW (New, Initially hidden) -->
+        <!-- 3. RECIPES VIEW (Initially hidden) -->
         <div id="recipes-view" class="w-full max-w-7xl hidden">
             <h2 class="text-5xl font-extrabold text-center text-orange-700 mb-12 py-4 border-b-4 border-orange-200 shadow-md rounded-lg bg-white/70">
                 Authentic Maharashtrian Delights
@@ -181,7 +180,6 @@
                 <!-- Content starts hidden -->
                 <div id="lunch-recipes" class="recipe-content hidden mt-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Recipes will be populated here -->
                     </div>
                 </div>
             </section>
@@ -197,7 +195,6 @@
                 <!-- Content starts hidden -->
                 <div id="dinner-recipes" class="recipe-content hidden mt-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Recipes will be populated here -->
                     </div>
                 </div>
             </section>
@@ -213,7 +210,6 @@
             </button>
             <div class="p-2">
                 <div id="video-embed" class="video-container rounded-lg overflow-hidden">
-                    <!-- Iframe will be inserted here -->
                 </div>
             </div>
         </div>
@@ -552,7 +548,7 @@
             });
         }
 
-        // Helper function to format an array of strings into an unordered HTML list
+        // Helper function formats an array of strings into an unordered HTML list
         function formatList(items) {
             if (!Array.isArray(items)) return '<p class="text-sm text-gray-800">Data not available.</p>';
             return `<ul class="list-disc ml-5 space-y-1 mt-1 text-gray-800 text-sm">` + 
@@ -562,7 +558,6 @@
 
         // --- RECIPE RENDERING ---
         function createRecipeCard(recipe) {
-            // Card structure remains the same
             return `
                 <div class="bg-white p-6 rounded-xl shadow-lg border border-orange-100 hover:shadow-xl transition duration-300 flex flex-col">
                     <h4 class="text-xl font-bold text-orange-700 mb-2">${recipe.title}</h4>
@@ -587,7 +582,6 @@
         
         // function inserts the content into the hidden containers
         function renderRecipes() {
-            // Note: The content itself is wrapped in a grid container within the HTML structure
             document.querySelector('#breakfast-recipes > div').innerHTML = recipeData.breakfast.map(createRecipeCard).join('');
             document.querySelector('#lunch-recipes > div').innerHTML = recipeData.lunch.map(createRecipeCard).join('');
             document.querySelector('#dinner-recipes > div').innerHTML = recipeData.dinner.map(createRecipeCard).join('');
@@ -722,7 +716,6 @@
                 if (e.target === uploadModal) uploadModal.classList.add('hidden');
             });
             
-            // --- NEW: Attach listeners to all section headers for collapse/expand ---
             document.querySelectorAll('.section-header').forEach(header => {
                 header.addEventListener('click', () => toggleSection(header));
             });
